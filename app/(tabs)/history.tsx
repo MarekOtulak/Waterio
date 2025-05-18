@@ -22,8 +22,8 @@ export default function History() {
         setSelectedAmount(null);
     };
 
-    const handleRemoveDrink = (time: string) => {
-        removeDrinkEntry(time);
+    const handleRemoveDrink = (id: string) => {
+        removeDrinkEntry(id);
     };
 
     return (
@@ -43,11 +43,11 @@ export default function History() {
             <ProgressBar progress={progress} color="black" style={{ height: 10, borderRadius: 5, marginBottom: 16 }} />
 
             <ScrollView className="mb-4">
-                {drinksToday.map((drink, idx) => (
-                    <View key={idx} className="flex-row items-center justify-between mb-2">
+                {drinksToday.map((drink) => (
+                    <View key={drink.id} className="flex-row items-center justify-between mb-2">
                         <Text className="text-base">● {drink.time} {drink.type}</Text>
                         <Text className="text-base font-semibold">{drink.volume} ml</Text>
-                        <TouchableOpacity onPress={() => handleRemoveDrink(drink.time)}>
+                        <TouchableOpacity onPress={() => handleRemoveDrink(drink.id)}>
                             <Ionicons name="close" size={18} color="black" />
                         </TouchableOpacity>
                     </View>

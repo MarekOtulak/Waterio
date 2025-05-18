@@ -10,7 +10,8 @@ import {
 } from 'firebase/firestore';
 import { useAuth } from './AuthContext';
 
-type Drink = {
+export type Drink = {
+    id: string; // Dodane pole ID
     time: string;
     type: string;
     volume: number;
@@ -18,8 +19,8 @@ type Drink = {
 
 type ContextType = {
     drinksToday: Drink[];
-    addDrinkEntry: (drink: Drink) => void;
-    removeDrinkEntry: (time: string) => void;
+    addDrinkEntry: (drink: Omit<Drink, 'id'>) => void;
+    removeDrinkEntry: (id: string) => void;
     getTodayTotal: () => number;
     getTodayEntries: () => Drink[];
 };
@@ -37,7 +38,6 @@ export const HydrationProvider = ({ children }: { children: React.ReactNode }) =
     const { user } = useAuth();
     const today = dayjs().format('YYYY-MM-DD');
 
-    // Retrieve hydration data when user is authenticated
     useEffect(() => {
         if (!user) {
             setDrinksToday([]);
@@ -61,8 +61,14 @@ export const HydrationProvider = ({ children }: { children: React.ReactNode }) =
         return () => unsubscribe();
     }, [user, today]);
 
-    const addDrinkEntry = async (drink: Drink) => {
+    const addDrinkEntry = async (drink: Omit<Drink, 'id'>) => {
         if (!user) return;
+
+        const newEntry: Drink = {
+            id: Date.now().toString(),
+            ...drink,
+        };
+
         const docRef = doc(db, 'users', user.uid, 'hydration', today);
 
         try {
@@ -70,12 +76,12 @@ export const HydrationProvider = ({ children }: { children: React.ReactNode }) =
 
             if (docSnap.exists()) {
                 await updateDoc(docRef, {
-                    entries: [...drinksToday, drink],
+                    entries: [...drinksToday, newEntry],
                     lastUpdated: new Date().toISOString(),
                 });
             } else {
                 await setDoc(docRef, {
-                    entries: [drink],
+                    entries: [newEntry],
                     date: today,
                     lastUpdated: new Date().toISOString(),
                 });
@@ -85,12 +91,14 @@ export const HydrationProvider = ({ children }: { children: React.ReactNode }) =
         }
     };
 
-    const removeDrinkEntry = async (time: string) => {
+    const removeDrinkEntry = async (id: string) => {
         if (!user) return;
+
+        const updatedEntries = drinksToday.filter(drink => drink.id !== id);
+
         const docRef = doc(db, 'users', user.uid, 'hydration', today);
 
         try {
-            const updatedEntries = drinksToday.filter(drink => drink.time !== time);
             await updateDoc(docRef, {
                 entries: updatedEntries,
                 lastUpdated: new Date().toISOString(),
