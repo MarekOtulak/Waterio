@@ -40,7 +40,7 @@ export default function Register() {
     };
 
     const navigateToLogin = () => {
-        router.push('../(auth)/login');
+        router.push('/(auth)/login');
     };
 
     return (

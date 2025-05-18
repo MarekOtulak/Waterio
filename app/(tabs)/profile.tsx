@@ -10,7 +10,7 @@ const Profile = () => {
     const handleLogout = async () => {
         try {
             await logout();
-            router.replace('../(auth)/login');
+            router.replace('/(auth)/login');
         } catch (error: any) {
             Alert.alert('Error', error.message);
         }

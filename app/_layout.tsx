@@ -9,23 +9,11 @@ export default function RootLayout() {
         <AuthProvider>
             <HydrationProvider>
                 <AuthGuard>
-                    <Stack screenOptions={{ headerShown: false }}>
+                    <Stack screenOptions={{ headerShown: true }}>
                         <Stack.Screen name="(tabs)" />
-                        <Stack.Screen
-                            name="login"
-                            options={{
-                                presentation: 'modal',
-                            }}
-                        />
-                        <Stack.Screen
-                            name="register"
-                            options={{
-                                presentation: 'modal',
-                            }}
-                        />
                     </Stack>
                 </AuthGuard>
             </HydrationProvider>
         </AuthProvider>
-    );
+    ); //zmienić później headershown na false
 }

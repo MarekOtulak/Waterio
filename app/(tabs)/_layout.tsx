@@ -23,7 +23,7 @@ const TabIcon = ({ focused, icon, title }: any) => {
     )
 }
 
-const _Layout = () => {
+const TabsLayout = () => {
     return (
         <Tabs
             screenOptions={{
@@ -93,4 +93,4 @@ const _Layout = () => {
     )
 }
 
-export default _Layout
+export default TabsLayout

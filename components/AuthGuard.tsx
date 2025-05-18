@@ -14,7 +14,7 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
         const inAuthGroup = segments[0] === '(tabs)';
 
         if (!user && inAuthGroup) {
-            router.replace('../(auth)/login');
+            router.replace('/(auth)/login');
         } else if (user && !inAuthGroup) {
             router.replace('../(tabs)/index');
         }
