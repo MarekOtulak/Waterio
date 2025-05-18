@@ -46,7 +46,7 @@ export default function Login() {
     };
 
     const navigateToRegister = () => {
-        router.push('/(auth)/register');
+        router.replace('/(auth)/register');
     };
 
     return (
