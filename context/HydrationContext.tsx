@@ -1,25 +1,23 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import dayjs from 'dayjs';
+import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
+import { Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import NetInfo from '@react-native-community/netinfo';
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '@/firebaseConfig';
-import {
-    doc,
-    setDoc,
-    getDoc,
-    onSnapshot,
-    updateDoc,
-} from 'firebase/firestore';
 import { useAuth } from './AuthContext';
+import dayjs from 'dayjs';
 
-export type Drink = {
-    id: string; // Dodane pole ID
+type Drink = {
+    id: string;
     time: string;
     type: string;
     volume: number;
+    synced: boolean;
 };
 
 type ContextType = {
     drinksToday: Drink[];
-    addDrinkEntry: (drink: Omit<Drink, 'id'>) => void;
+    addDrinkEntry: (drink: Omit<Drink, 'id' | 'synced'>) => void;
     removeDrinkEntry: (id: string) => void;
     getTodayTotal: () => number;
     getTodayEntries: () => Drink[];
@@ -38,73 +36,151 @@ export const HydrationProvider = ({ children }: { children: React.ReactNode }) =
     const { user } = useAuth();
     const today = dayjs().format('YYYY-MM-DD');
 
+    // Klucz lokalnego storage zależny od usera i daty
+    const storageKey = user ? `hydration-${user.uid}-${today}` : `hydration-guest-${today}`;
+
+    // Ref do zapamiętania poprzedniego usera (do czyszczenia danych)
+    const prevUserRef = useRef<string | null>(null);
+
+    // Efekt czyszczący dane przy zmianie usera
     useEffect(() => {
-        if (!user) {
-            setDrinksToday([]);
-            return () => {};
-        }
-
-        const docRef = doc(db, 'users', user.uid, 'hydration', today);
-
-        const unsubscribe = onSnapshot(docRef, (snapshot) => {
-            const data = snapshot.data();
-            if (data?.entries) {
-                setDrinksToday(data.entries);
-            } else {
-                setDrinksToday([]);
+        const clearOldUserData = async () => {
+            if (prevUserRef.current && prevUserRef.current !== user?.uid) {
+                const oldStorageKey = `hydration-${prevUserRef.current}-${today}`;
+                try {
+                    await AsyncStorage.removeItem(oldStorageKey);
+                } catch (e) {
+                    console.error('Error clearing old user hydration data:', e);
+                }
             }
-        }, (error) => {
-            console.error("Error fetching hydration data:", error);
-            setDrinksToday([]);
-        });
+            prevUserRef.current = user ? user.uid : null;
 
-        return () => unsubscribe();
+            // Zresetuj stan przy każdej zmianie usera lub wylogowaniu
+            setDrinksToday([]);
+        };
+
+        clearOldUserData();
     }, [user, today]);
 
-    const addDrinkEntry = async (drink: Omit<Drink, 'id'>) => {
-        if (!user) return;
+    // Efekt ładujący lokalne dane i Firestore po zmianie usera lub dnia
+    useEffect(() => {
+        const loadLocalData = async () => {
+            try {
+                const localData = await AsyncStorage.getItem(storageKey);
+                if (localData) {
+                    setDrinksToday(JSON.parse(localData));
+                }
 
-        const newEntry: Drink = {
-            id: Date.now().toString(),
-            ...drink,
+                if (user) {
+                    const docRef = doc(db, 'users', user.uid, 'hydration', today);
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        if (data?.entries) {
+                            const entries: Drink[] = data.entries.map((entry: any) => ({
+                                ...entry,
+                                synced: true,
+                            }));
+
+                            setDrinksToday(entries);
+                            await AsyncStorage.setItem(storageKey, JSON.stringify(entries));
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading hydration data:', error);
+            }
         };
+
+        loadLocalData();
+    }, [user, today, storageKey]);
+
+    useEffect(() => {
+        const unsubscribe = NetInfo.addEventListener(state => {
+            if (state.isConnected) {
+                syncUnsyncedEntries();
+            }
+        });
+
+        return () => {
+            unsubscribe();
+        };
+    }, [drinksToday, user]);
+
+    const saveToLocal = async (entries: Drink[]) => {
+        try {
+            await AsyncStorage.setItem(storageKey, JSON.stringify(entries));
+        } catch (error) {
+            console.error('Error saving hydration data locally:', error);
+        }
+    };
+
+    const syncUnsyncedEntries = async () => {
+        if (!user) return;
+        const unsynced = drinksToday.filter(drink => !drink.synced);
+        if (unsynced.length === 0) return;
 
         const docRef = doc(db, 'users', user.uid, 'hydration', today);
 
         try {
             const docSnap = await getDoc(docRef);
+            const existingEntries = docSnap.exists() ? docSnap.data().entries || [] : [];
 
-            if (docSnap.exists()) {
-                await updateDoc(docRef, {
-                    entries: [...drinksToday, newEntry],
-                    lastUpdated: new Date().toISOString(),
-                });
-            } else {
-                await setDoc(docRef, {
-                    entries: [newEntry],
-                    date: today,
-                    lastUpdated: new Date().toISOString(),
-                });
-            }
+            const newEntries = [...existingEntries, ...unsynced.map(({ synced, ...rest }) => rest)];
+
+            await setDoc(docRef, {
+                entries: newEntries,
+                date: today,
+                lastUpdated: new Date().toISOString(),
+            });
+
+            const updatedDrinks = drinksToday.map(drink =>
+                unsynced.find(u => u.id === drink.id) ? { ...drink, synced: true } : drink
+            );
+            setDrinksToday(updatedDrinks);
+            await saveToLocal(updatedDrinks);
         } catch (error) {
-            console.error('Error adding hydration entry:', error);
+            console.error('Error syncing hydration data:', error);
+        }
+    };
+
+    const addDrinkEntry = async (drink: Omit<Drink, 'id' | 'synced'>) => {
+        const newDrink: Drink = {
+            id: Date.now().toString(),
+            ...drink,
+            synced: false,
+        };
+        const updatedDrinks = [...drinksToday, newDrink];
+        setDrinksToday(updatedDrinks);
+        await saveToLocal(updatedDrinks);
+
+        const netState = await NetInfo.fetch();
+        if (netState.isConnected) {
+            syncUnsyncedEntries();
         }
     };
 
     const removeDrinkEntry = async (id: string) => {
-        if (!user) return;
+        const updatedDrinks = drinksToday.filter(drink => drink.id !== id);
+        setDrinksToday(updatedDrinks);
+        await saveToLocal(updatedDrinks);
 
-        const updatedEntries = drinksToday.filter(drink => drink.id !== id);
-
-        const docRef = doc(db, 'users', user.uid, 'hydration', today);
-
-        try {
-            await updateDoc(docRef, {
-                entries: updatedEntries,
-                lastUpdated: new Date().toISOString(),
-            });
-        } catch (error) {
-            console.error('Error removing hydration entry:', error);
+        const netState = await NetInfo.fetch();
+        if (netState.isConnected && user) {
+            const docRef = doc(db, 'users', user.uid, 'hydration', today);
+            try {
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const existingEntries = docSnap.data().entries || [];
+                    const newEntries = existingEntries.filter((entry: any) => entry.id !== id);
+                    await updateDoc(docRef, {
+                        entries: newEntries,
+                        lastUpdated: new Date().toISOString(),
+                    });
+                }
+            } catch (error) {
+                console.error('Error removing hydration entry from Firestore:', error);
+            }
         }
     };
 
