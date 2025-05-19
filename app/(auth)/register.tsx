@@ -15,7 +15,7 @@ export default function Register() {
 
     const handleRegister = async () => {
         if (!email || !password || !confirmPassword) {
-            setError('All fields are required');
+            setError(t('register_AllReq'));
             return;
         }
 

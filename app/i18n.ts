@@ -1,8 +1,7 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { resources } from "@/languages/en";
-import { resourcesPL } from "@/languages/pl";
+import { resources } from "@/languages/translation";
 
 
 export const initI18n = async () => {

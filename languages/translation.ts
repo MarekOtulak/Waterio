@@ -15,6 +15,7 @@ export const resources = {
             login_registerLink: " Sign Up",
 
             register_create: "Create Account",
+            register_AllReq: "All fields are required",
 
             auth_login: "Login",
             auth_register: "Register",
@@ -66,6 +67,7 @@ export const resources = {
             login_registerLink: " Zarejestruj się",
 
             register_create: "Stwórz konto",
+            register_AllReq: "Wszystkie pola są wymagane",
 
             auth_login: "Zaloguj się",
             auth_register: "Zarejestruj się",
