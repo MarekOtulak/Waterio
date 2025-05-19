@@ -12,7 +12,9 @@ export const resources = {
             login_resetSuccess: "Check your email for password reset instructions",
             login_resetError: "Email Required",
             login_registerQuestion: "Don't have an account?",
-            login_registerLink: "Sign Up",
+            login_registerLink: " Sign Up",
+
+            register_create: "Create Account",
 
             auth_login: "Login",
             auth_register: "Register",
@@ -22,8 +24,8 @@ export const resources = {
             auth_forgotPassword: "Forgot Password?",
             auth_noAccount: "Don't have an account?",
             auth_haveAccount: "Already have an account?",
-            auth_signUp: "Sign Up",
-            auth_signIn: "Sign In",
+            auth_signUp: " Sign Up",
+            auth_signIn: " Sign In",
             auth_logout: "Logout",
             auth_resetPassword: "Reset Password",
             auth_emailRequired: "Email and password are required",
@@ -61,7 +63,9 @@ export const resources = {
             login_resetSuccess: "Sprawdź skrzynkę mailową, aby zresetować hasło",
             login_resetError: "Wymagany email",
             login_registerQuestion: "Nie masz jeszcze konta?",
-            login_registerLink: "Zarejestruj się",
+            login_registerLink: " Zarejestruj się",
+
+            register_create: "Stwórz konto",
 
             auth_login: "Zaloguj się",
             auth_register: "Zarejestruj się",
@@ -71,8 +75,8 @@ export const resources = {
             auth_forgotPassword: "Zapomniałeś hasła?",
             auth_noAccount: "Nie masz konta?",
             auth_haveAccount: "Masz już konto?",
-            auth_signUp: "Zarejestruj się",
-            auth_signIn: "Zaloguj się",
+            auth_signUp: " Zarejestruj się",
+            auth_signIn: " Zaloguj się",
             auth_logout: "Wyloguj się",
             auth_resetPassword: "Zresetuj hasło",
             auth_emailRequired: "Email i hasło są wymagane",

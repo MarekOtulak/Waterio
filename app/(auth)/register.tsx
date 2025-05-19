@@ -2,8 +2,11 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
 import { registerWithEmail } from '@/services/authService';
+import { useTranslation } from 'react-i18next';
 
 export default function Register() {
+    const { t } = useTranslation();
+
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -17,12 +20,12 @@ export default function Register() {
         }
 
         if (password !== confirmPassword) {
-            setError('Passwords do not match');
+            setError(t('auth_passwordsNoMatch'));
             return;
         }
 
         if (password.length < 6) {
-            setError('Password must be at least 6 characters');
+            setError(t('auth_passwordTooShort'));
             return;
         }
 
@@ -45,14 +48,14 @@ export default function Register() {
 
     return (
         <View className="flex-1 bg-gradient-to-b from-cyan-100 to-cyan-300 px-6 justify-center">
-            <Text className="text-3xl font-bold mb-8 text-center">Waterio</Text>
-            <Text className="text-2xl font-semibold mb-6 text-center">Create Account</Text>
+            <Text className="text-3xl font-bold mb-8 text-center">{t('app_name')}</Text>
+            <Text className="text-2xl font-semibold mb-6 text-center">{t('register_create')}</Text>
 
             {error ? <Text className="text-red-600 mb-4 text-center">{error}</Text> : null}
 
             <TextInput
                 className="bg-white px-4 py-3 rounded-xl mb-4"
-                placeholder="Email"
+                placeholder={t('auth_email')}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 value={email}
@@ -61,7 +64,7 @@ export default function Register() {
 
             <TextInput
                 className="bg-white px-4 py-3 rounded-xl mb-4"
-                placeholder="Password"
+                placeholder={t('auth_password')}
                 secureTextEntry
                 value={password}
                 onChangeText={setPassword}
@@ -69,7 +72,7 @@ export default function Register() {
 
             <TextInput
                 className="bg-white px-4 py-3 rounded-xl mb-6"
-                placeholder="Confirm Password"
+                placeholder={t('auth_confirmPassword')}
                 secureTextEntry
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
@@ -83,14 +86,14 @@ export default function Register() {
                 {isLoading ? (
                     <ActivityIndicator color="white" />
                 ) : (
-                    <Text className="text-white text-center font-semibold text-lg">Register</Text>
+                    <Text className="text-white text-center font-semibold text-lg">{t('auth_register')}</Text>
                 )}
             </TouchableOpacity>
 
             <View className="flex-row justify-center">
-                <Text className="text-gray-700">Already have an account? </Text>
+                <Text className="text-gray-700">{t('auth_haveAccount')}</Text>
                 <TouchableOpacity onPress={navigateToLogin}>
-                    <Text className="font-semibold">Sign In</Text>
+                    <Text className="font-semibold">{t('auth_signIn')}</Text>
                 </TouchableOpacity>
             </View>
         </View>

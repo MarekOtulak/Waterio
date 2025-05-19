@@ -25,7 +25,7 @@ export default function RootLayout() {
             <AuthProvider>
                 <HydrationProvider>
                     <AuthGuard>
-                        <Stack screenOptions={{ headerShown: true }}>
+                        <Stack screenOptions={{ headerShown: false }}>
                             <Stack.Screen name="(tabs)" />
                         </Stack>
                     </AuthGuard>

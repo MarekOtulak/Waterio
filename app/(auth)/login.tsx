@@ -2,8 +2,11 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { router } from 'expo-router';
 import { loginWithEmail, resetPassword } from '@/services/authService';
+import { useTranslation } from 'react-i18next';
 
 export default function Login() {
+    const { t } = useTranslation();
+
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -11,7 +14,7 @@ export default function Login() {
 
     const handleLogin = async () => {
         if (!email || !password) {
-            setError('Email and password are required');
+            setError(t('login_missingFields'));
             return;
         }
 
@@ -30,16 +33,16 @@ export default function Login() {
 
     const handleForgotPassword = async () => {
         if (!email) {
-            Alert.alert('Email Required', 'Please enter your email address to reset your password');
+            Alert.alert(t('login_resetError'), t('auth_emailMissing'));
             return;
         }
 
         setIsLoading(true);
         try {
             await resetPassword(email);
-            Alert.alert('Password Reset', 'Check your email for password reset instructions');
+            Alert.alert(t('auth_resetPassword'), t('auth_resetSuccess'));
         } catch (error: any) {
-            Alert.alert('Error', error.message);
+            Alert.alert(t('auth_error'), error.message);
         } finally {
             setIsLoading(false);
         }
@@ -51,8 +54,8 @@ export default function Login() {
 
     return (
         <View className="flex-1 bg-gradient-to-b from-cyan-100 to-cyan-300 px-6 justify-center">
-            <Text className="text-3xl font-bold mb-8 text-center">Waterio</Text>
-            <Text className="text-2xl font-semibold mb-6 text-center">Login</Text>
+            <Text className="text-3xl font-bold mb-8 text-center">{t('app_name')}</Text>
+            <Text className="text-2xl font-semibold mb-6 text-center">{t('login_title')}</Text>
 
             {error ? <Text className="text-red-600 mb-4 text-center">{error}</Text> : null}
 
@@ -81,18 +84,18 @@ export default function Login() {
                 {isLoading ? (
                     <ActivityIndicator color="white" />
                 ) : (
-                    <Text className="text-white text-center font-semibold text-lg">Login</Text>
+                    <Text className="text-white text-center font-semibold text-lg">{t('login_submit')}</Text>
                 )}
             </TouchableOpacity>
 
             <TouchableOpacity onPress={handleForgotPassword} disabled={isLoading}>
-                <Text className="text-center text-gray-700 mb-6">Forgot Password?</Text>
+                <Text className="text-center text-gray-700 mb-6">{t('login_forgot')}</Text>
             </TouchableOpacity>
 
             <View className="flex-row justify-center">
-                <Text className="text-gray-700">Don't have an account? </Text>
+                <Text className="text-gray-700">{t('login_registerQuestion')}</Text>
                 <TouchableOpacity onPress={navigateToRegister}>
-                    <Text className="font-semibold">Sign Up</Text>
+                    <Text className="font-semibold">{t('login_registerLink')}</Text>
                 </TouchableOpacity>
             </View>
         </View>
