@@ -3,10 +3,13 @@ import { View, Text, TextInput, ScrollView, TouchableOpacity } from 'react-nativ
 import { Ionicons } from '@expo/vector-icons';
 import { useHydration } from '@/context/HydrationContext';
 import { ProgressBar } from 'react-native-paper';
+import { useTranslation } from 'react-i18next';
 
 const goal = 2000;
 
 export default function History() {
+    const { t } = useTranslation();
+
     const { drinksToday, getTodayTotal, addDrinkEntry, removeDrinkEntry } = useHydration();
     const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
     const progress = Math.min(getTodayTotal() / goal, 1);

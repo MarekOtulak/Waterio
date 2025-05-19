@@ -3,6 +3,7 @@ import {Tabs} from "expo-router";
 import {images} from "@/constants/images";
 import {Image, ImageBackground, Text, View} from "react-native";
 import {icons} from "@/constants/icons";
+import { useTranslation } from 'react-i18next';
 
 const TabIcon = ({ focused, icon, title }: any) => {
     if(focused) {
@@ -24,6 +25,7 @@ const TabIcon = ({ focused, icon, title }: any) => {
 }
 
 const TabsLayout = () => {
+    const { t } = useTranslation();
     return (
         <Tabs
             screenOptions={{
@@ -56,7 +58,7 @@ const TabsLayout = () => {
                         <TabIcon
                             focused={focused}
                             icon={icons.home}
-                            title="Home"
+                            title={t('tabs_home')}
                         />
                     )
                 }}
@@ -70,7 +72,7 @@ const TabsLayout = () => {
                         <TabIcon
                             focused={focused}
                             icon={icons.search}
-                            title="History"
+                            title={t('tabs_history')}
                         />
                     )
                 }}
@@ -84,7 +86,7 @@ const TabsLayout = () => {
                         <TabIcon
                             focused={focused}
                             icon={icons.person}
-                            title="Profile"
+                            title={t('profile_title')}
                         />
                     )
                 }}

@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { icons } from '@/constants/icons';
 import { useHydration } from '@/context/HydrationContext';
 import { ProgressBar } from 'react-native-paper';
+import { useTranslation } from 'react-i18next';
 
 const amounts = [330, 250, 180, 130];
 const goal = 2000;
@@ -12,6 +13,8 @@ const windowWidth = Dimensions.get('window').width;
 const cardWidth = windowWidth * 0.4; // Responsive width for drink cards
 
 export default function Index() {
+    const { t } = useTranslation();
+
     const { addDrinkEntry, getTodayTotal } = useHydration();
     const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
     const progress = Math.min(getTodayTotal() / goal, 1);
@@ -29,7 +32,7 @@ export default function Index() {
 
     return (
         <View className="flex-1 bg-gradient-to-b from-cyan-100 to-cyan-300 px-4 pt-12">
-            <Text className="text-xl font-bold mb-2">Today You Drank:</Text>
+            <Text className="text-xl font-bold mb-2">{t('home_todayDrank')}</Text>
             <View className="flex-row items-center justify-between mb-4">
                 <Text className="font-bold">{getTodayTotal()} ml / {goal} ml</Text>
             </View>
@@ -67,7 +70,7 @@ export default function Index() {
                 onPress={handleAddDrink}
             >
                 <Ionicons name="add" size={24} color="white" />
-                <Text className="text-white ml-2">Add a drink</Text>
+                <Text className="text-white ml-2">{t('home_addDrink')}</Text>
             </TouchableOpacity>
         </View>
     );
