@@ -4,6 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import { logout } from '@/services/authService';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import LanguageToggle from '@/components/LanguageToggle';
 
 const Profile = () => {
     const { t } = useTranslation();
@@ -22,6 +23,7 @@ const Profile = () => {
     return (
         <View className="flex-1 bg-gradient-to-b from-cyan-100 to-cyan-300 px-4 pt-12">
             <Text className="text-2xl font-bold mb-6">{t('profile_title')}</Text>
+            <LanguageToggle />
             <View className="bg-white rounded-xl p-6 mb-6 shadow-sm">
                 <Text className="text-lg mb-2 font-medium">{t('profile_email')}</Text>
                 <Text className="text-gray-700 mb-4">{user?.email}</Text>

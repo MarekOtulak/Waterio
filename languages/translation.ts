@@ -48,7 +48,10 @@ export const resources = {
 
             tabs_home: "Home",
             tabs_history: "History",
-            tabs_profile: "Profile"
+            tabs_profile: "Profile",
+
+            lanToggle_EN: "Switch to English",
+            lanToggle_PL: "Switch to Polish",
         }
     },
     pl: {
@@ -100,7 +103,10 @@ export const resources = {
 
             tabs_home: "Strona główna",
             tabs_history: "Historia",
-            tabs_profile: "Profil"
+            tabs_profile: "Profil",
+
+            lanToggle_EN: "Zmień na angielski",
+            lanToggle_PL: "Zmień na polski",
         }
     }
 };
