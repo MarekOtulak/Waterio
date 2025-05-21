@@ -5,8 +5,10 @@ import { useTranslation } from 'react-i18next'; // Hook do używania tłumaczeń
 
 const LanguageToggle = () => {
     const { t } = useTranslation(); // Hook udostępniający funkcję `t()` do tłumaczeń tekstów.
+
     // Ustawienie początkowego języka na aktualnie używany język w i18n ('en' lub 'pl').
     const [language, setLanguage] = useState<'en' | 'pl'>(i18n.language as 'en' | 'pl');
+
     // Funkcja przełączająca język aplikacji.
     const toggleLanguage = () => {
         const newLang = language === 'en' ? 'pl' : 'en'; // Jeśli aktualnie 'en', to przełącz na 'pl', i odwrotnie.

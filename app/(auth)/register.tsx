@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'; // hook do internacjonalizacji z
 
 export default function Register() {
     const { t } = useTranslation(); // dostęp do tłumaczeń
+
     // Lokalne stany formularza i statusów
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -15,6 +16,7 @@ export default function Register() {
 
     // Główna funkcja obsługująca proces rejestracji
     const handleRegister = async () => {
+
         // Walidacja pól formularza
         if (!email || !password || !confirmPassword) {
             setError(t('register_AllReq'));
@@ -30,6 +32,7 @@ export default function Register() {
             setError(t('auth_passwordTooShort'));
             return;
         }
+
         // Reset błędu i włączenie spinnera
         setError('');
         setIsLoading(true);
@@ -46,6 +49,7 @@ export default function Register() {
             setIsLoading(false); // spinner off
         }
     };
+
     // Przekierowanie do ekranu logowania
     const navigateToLogin = () => {
         router.push('/(auth)/login');

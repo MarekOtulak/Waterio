@@ -5,6 +5,7 @@ import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'; // operacje
 import { db } from '@/firebaseConfig'; // konfiguracja Firestore
 import { useAuth } from './AuthContext'; // aktualnie zalogowany użytkownik
 import dayjs from 'dayjs'; // obsługa dat
+
 // Struktura pojedynczego wpisu o nawodnieniu
 type Drink = {
     id: string;
@@ -13,6 +14,7 @@ type Drink = {
     volume: number;
     synced: boolean; // true = zsynchronizowany z Firestore
 };
+
 // Typ kontekstu, czyli co udostępniamy dzieciom
 type ContextType = {
     drinksToday: Drink[]; // lista napojów z dzisiejszego dnia
@@ -21,6 +23,7 @@ type ContextType = {
     getTodayTotal: () => number; // suma objętości
     getTodayEntries: () => Drink[]; // wszystkie wpisy
 };
+
 //Kontekst i hook
 const HydrationContext = createContext<ContextType | undefined>(undefined);
 
@@ -105,6 +108,7 @@ export const HydrationProvider = ({ children }: { children: React.ReactNode }) =
             unsubscribe();
         };
     }, [drinksToday, user]);
+
     // Zapis do AsyncStorage
     const saveToLocal = async (entries: Drink[]) => {
         try {

@@ -13,6 +13,7 @@ import LanguageToggle from '@/components/LanguageToggle';
 
 const Profile = () => {
     const { t } = useTranslation(); // Hook tłumaczeń
+
     // Pobieramy użytkownika z kontekstu (dostępne dane to np. email i uid)
     const { user } = useAuth();
 

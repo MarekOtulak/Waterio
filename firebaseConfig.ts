@@ -16,6 +16,7 @@ import {
     APPID,
     MEASUREMENTID
 } from '@env';
+
 // Konfiguracja Firebase – aktualnie wpisana na sztywno
 const firebaseConfig = {
     apiKey: "AIzaSyApNkg-USlUqzb_mdTgurV0y_EleNQhBWo", // Klucz API do komunikacji z Firebase
@@ -26,15 +27,19 @@ const firebaseConfig = {
     appId: "1:1073728766619:web:4788448d01f28fac46fc3e", // Unikalne ID aplikacji Firebase
     measurementId: "G-HEJTPQEMB7" // (opcjonalne) – do Google Analytics
 };
+
 // Inicjalizacja aplikacji Firebase – singleton używany w całej aplikacji
 const app = initializeApp(firebaseConfig);
+
 // Inicjalizacja Firebase Auth z obsługą trwałej sesji dzięki AsyncStorage (wymagane dla React Native)
 // Dzięki temu użytkownik nie musi się ponownie logować po restarcie aplikacji
 const auth = initializeAuth(app, {
     persistence: getReactNativePersistence(ReactNativeAsyncStorage)
 });
+
 // Inicjalizacja Firestore – używany do zapisywania danych o nawodnieniu (wpisy dzienne)
 // W moim przypadku działa jako *backup* danych lokalnych (offline-first model)
 const db = getFirestore(app);
+
 // Eksport gotowych instancji bazy danych i autoryzacji – używane w `authService`, `HydrationContext` itp.
 export { db, auth };

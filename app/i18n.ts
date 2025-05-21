@@ -19,5 +19,6 @@ export const initI18n = async () => {
             }
         });
 };
+
 // Eksport instancji i18n do użycia np. wymuszeniu zmiany języka
 export default i18n;

@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'; // Hook do i18n (obsługa tłuma
 // Predefiniowane objętości napojów do wyboru
 const amounts = [330, 250, 180, 130];
 const goal = 2000; // Codzienny cel nawodnienia (w ml)
+
 // Obliczamy szerokość karty na podstawie rozmiaru ekranu
 const windowWidth = Dimensions.get('window').width;
 const cardWidth = windowWidth * 0.4; // Responsive width for drink cards
@@ -18,8 +19,10 @@ export default function Index() {
 
     const { addDrinkEntry, getTodayTotal } = useHydration(); // Funkcje z HydrationContext
     const [selectedAmount, setSelectedAmount] = useState<number | null>(null); // Wybrana ilość wody
+
     // Obliczamy postęp nawodnienia jako procent celu
     const progress = Math.min(getTodayTotal() / goal, 1);
+
     // Obsługuje dodanie wpisu picia do lokalnego stanu i (później) synchronizacji z Firestore
     const handleAddDrink = () => {
         if (!selectedAmount) return;

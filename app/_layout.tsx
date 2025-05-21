@@ -27,6 +27,7 @@ export default function RootLayout() {
     }, []);
 
     if (!ready) return null; // unikamy renderowania aplikacji bez dostępnych tłumaczeń
+
     // I18nextProvider: dostarcza dostęp do tłumaczeń przez `t()`
     // AuthProvider: dostarcza dostęp do danych logowania użytkownika
     // HydrationProvider: trzyma lokalne wpisy nawodnienia, synchronizuje z Firestore

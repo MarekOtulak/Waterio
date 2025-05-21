@@ -9,13 +9,15 @@ const goal = 2000; // Dzienny cel nawodnienia (w ml)
 
 export default function History() {
     const { t } = useTranslation(); // Hook do tłumaczeń
+
     // Z kontekstu nawodnienia pobieramy:
     const { drinksToday, getTodayTotal, addDrinkEntry, removeDrinkEntry } = useHydration();
+
     // Lokalny stan dla wybranej ilości płynu do dodania
     const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
+
     // Oblicz postęp względem celu nawodnienia (maksymalnie 100%)
     const progress = Math.min(getTodayTotal() / goal, 1);
-
 
     // Usunięcie wpisu po ID
     const handleRemoveDrink = (id: string) => {

@@ -32,6 +32,7 @@ export default function Login() {
             setIsLoading(false); // koniec spinnera
         }
     };
+
     // Obsługa zapomnianego hasła (wysyłka e-maila resetującego)
     const handleForgotPassword = async () => {
         if (!email) {
@@ -49,10 +50,12 @@ export default function Login() {
             setIsLoading(false);
         }
     };
+
     // Przejście do ekranu rejestracji
     const navigateToRegister = () => {
         router.replace('/(auth)/register');
     };
+
     // UI ekranu logowania
     return (
         <View className="flex-1 bg-gradient-to-b from-cyan-100 to-cyan-300 px-6 justify-center">

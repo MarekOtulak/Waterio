@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next'; // i18n hook do tłumaczeń
 // Komponent wyświetlający ikonę i tytuł tab-a, z wyróżnieniem jeśli aktywny
 const TabIcon = ({ focused, icon, title }: any) => {
     if(focused) {
-        // Jeśli zakładka aktywna, pokazuje tło (highlight) i tekst
+        // Jeśli zakładka aktywna, to pokazuje tło (highlight) i tekst
         return(
             <ImageBackground
                 source={images.highlight} // np. gradient lub inny dekoracyjny obrazek
