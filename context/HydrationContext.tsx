@@ -1,28 +1,27 @@
 import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
-import { Alert } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import NetInfo from '@react-native-community/netinfo';
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
-import { db } from '@/firebaseConfig';
-import { useAuth } from './AuthContext';
-import dayjs from 'dayjs';
-
+import AsyncStorage from '@react-native-async-storage/async-storage'; // lokalne przechowywanie danych offline
+import NetInfo from '@react-native-community/netinfo'; // wykrywanie połączenia sieciowego
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'; // operacje Firestore
+import { db } from '@/firebaseConfig'; // konfiguracja Firestore
+import { useAuth } from './AuthContext'; // aktualnie zalogowany użytkownik
+import dayjs from 'dayjs'; // obsługa dat
+// Struktura pojedynczego wpisu o nawodnieniu
 type Drink = {
     id: string;
     time: string;
     type: string;
     volume: number;
-    synced: boolean;
+    synced: boolean; // true = zsynchronizowany z Firestore
 };
-
+// Typ kontekstu, czyli co udostępniamy dzieciom
 type ContextType = {
-    drinksToday: Drink[];
-    addDrinkEntry: (drink: Omit<Drink, 'id' | 'synced'>) => void;
-    removeDrinkEntry: (id: string) => void;
-    getTodayTotal: () => number;
-    getTodayEntries: () => Drink[];
+    drinksToday: Drink[]; // lista napojów z dzisiejszego dnia
+    addDrinkEntry: (drink: Omit<Drink, 'id' | 'synced'>) => void; // dodanie nowego wpisu
+    removeDrinkEntry: (id: string) => void; // usunięcie wpisu
+    getTodayTotal: () => number; // suma objętości
+    getTodayEntries: () => Drink[]; // wszystkie wpisy
 };
-
+//Kontekst i hook
 const HydrationContext = createContext<ContextType | undefined>(undefined);
 
 export const useHydration = () => {
@@ -32,9 +31,9 @@ export const useHydration = () => {
 };
 
 export const HydrationProvider = ({ children }: { children: React.ReactNode }) => {
-    const [drinksToday, setDrinksToday] = useState<Drink[]>([]);
-    const { user } = useAuth();
-    const today = dayjs().format('YYYY-MM-DD');
+    const [drinksToday, setDrinksToday] = useState<Drink[]>([]); // aktualna lista napojów
+    const { user } = useAuth(); // aktualny użytkownik
+    const today = dayjs().format('YYYY-MM-DD'); // dzisiejsza data w formacie YYYY-MM-DD
 
     // Klucz lokalnego storage zależny od usera i daty
     const storageKey = user ? `hydration-${user.uid}-${today}` : `hydration-guest-${today}`;
@@ -48,7 +47,7 @@ export const HydrationProvider = ({ children }: { children: React.ReactNode }) =
             if (prevUserRef.current && prevUserRef.current !== user?.uid) {
                 const oldStorageKey = `hydration-${prevUserRef.current}-${today}`;
                 try {
-                    await AsyncStorage.removeItem(oldStorageKey);
+                    await AsyncStorage.removeItem(oldStorageKey); // usunięcie starych danych
                 } catch (e) {
                     console.error('Error clearing old user hydration data:', e);
                 }
@@ -68,7 +67,7 @@ export const HydrationProvider = ({ children }: { children: React.ReactNode }) =
             try {
                 const localData = await AsyncStorage.getItem(storageKey);
                 if (localData) {
-                    setDrinksToday(JSON.parse(localData));
+                    setDrinksToday(JSON.parse(localData)); // ładuj lokalne dane
                 }
 
                 if (user) {
@@ -79,7 +78,7 @@ export const HydrationProvider = ({ children }: { children: React.ReactNode }) =
                         if (data?.entries) {
                             const entries: Drink[] = data.entries.map((entry: any) => ({
                                 ...entry,
-                                synced: true,
+                                synced: true, // oznacz jako zsynchronizowane
                             }));
 
                             setDrinksToday(entries);
@@ -98,7 +97,7 @@ export const HydrationProvider = ({ children }: { children: React.ReactNode }) =
     useEffect(() => {
         const unsubscribe = NetInfo.addEventListener(state => {
             if (state.isConnected) {
-                syncUnsyncedEntries();
+                syncUnsyncedEntries(); // wyślij dane do Firestore
             }
         });
 
@@ -106,7 +105,7 @@ export const HydrationProvider = ({ children }: { children: React.ReactNode }) =
             unsubscribe();
         };
     }, [drinksToday, user]);
-
+    // Zapis do AsyncStorage
     const saveToLocal = async (entries: Drink[]) => {
         try {
             await AsyncStorage.setItem(storageKey, JSON.stringify(entries));
@@ -115,9 +114,10 @@ export const HydrationProvider = ({ children }: { children: React.ReactNode }) =
         }
     };
 
+    //Synchronizacja danych offline → Firestore
     const syncUnsyncedEntries = async () => {
         if (!user) return;
-        const unsynced = drinksToday.filter(drink => !drink.synced);
+        const unsynced = drinksToday.filter(drink => !drink.synced); // wybierz niezsynchronizowane
         if (unsynced.length === 0) return;
 
         const docRef = doc(db, 'users', user.uid, 'hydration', today);
@@ -133,7 +133,7 @@ export const HydrationProvider = ({ children }: { children: React.ReactNode }) =
                 date: today,
                 lastUpdated: new Date().toISOString(),
             });
-
+            // oznacz jako zsynchronizowane
             const updatedDrinks = drinksToday.map(drink =>
                 unsynced.find(u => u.id === drink.id) ? { ...drink, synced: true } : drink
             );
@@ -146,20 +146,21 @@ export const HydrationProvider = ({ children }: { children: React.ReactNode }) =
 
     const addDrinkEntry = async (drink: Omit<Drink, 'id' | 'synced'>) => {
         const newDrink: Drink = {
-            id: Date.now().toString(),
+            id: Date.now().toString(), // unikalne ID na podstawie czasu
             ...drink,
             synced: false,
         };
         const updatedDrinks = [...drinksToday, newDrink];
         setDrinksToday(updatedDrinks);
         await saveToLocal(updatedDrinks);
-
+        // Spróbuj zsynchronizować jeśli online
         const netState = await NetInfo.fetch();
         if (netState.isConnected) {
             syncUnsyncedEntries();
         }
     };
 
+    //Usuwanie wpisu
     const removeDrinkEntry = async (id: string) => {
         const updatedDrinks = drinksToday.filter(drink => drink.id !== id);
         setDrinksToday(updatedDrinks);
@@ -183,10 +184,10 @@ export const HydrationProvider = ({ children }: { children: React.ReactNode }) =
             }
         }
     };
-
+    //Sumy i dostęp do danych
     const getTodayTotal = () => drinksToday.reduce((sum, d) => sum + d.volume, 0);
     const getTodayEntries = () => drinksToday;
-
+    //Eksport kontekstu
     return (
         <HydrationContext.Provider
             value={{ drinksToday, addDrinkEntry, removeDrinkEntry, getTodayTotal, getTodayEntries }}
